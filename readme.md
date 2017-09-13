@@ -10,13 +10,13 @@ This module can be useful to check if the camera is already in use or notify you
 ## Requirements
 
 - macOS 10.11+
-- Xcode 9+
-- Swift 4+
+- Xcode 11+
+- Swift 5.1+
 
 
 ## Install
 
-With [SPM](https://swift.org/package-manager/):
+#### SwiftPM
 
 ```swift
 .package(url: "https://github.com/sindresorhus/is-camera-on", from: "2.0.0")
@@ -37,8 +37,6 @@ print(isCameraOn())
 
 - [node-is-camera-on](https://github.com/sindresorhus/node-is-camera-on) - Node.js wrapper for this module
 - [is-camera-on-cli](https://github.com/sindresorhus/is-camera-on-cli) - CLI for this module
-
-
-## License
-
-MIT © [Sindre Sorhus](https://sindresorhus.com)
+- [macos-wallpaper](https://github.com/sindresorhus/macos-wallpaper) - Manage the desktop wallpaper
+- [do-not-disturb](https://github.com/sindresorhus/do-not-disturb) - Control the macOS `Do Not Disturb` feature
+- [More…](https://github.com/search?q=user%3Asindresorhus+language%3Aswift)
