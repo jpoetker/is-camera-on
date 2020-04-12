@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 import CoreMediaIO
 
-private func getCameraProp() -> CMIOObjectID? {
+private func getCameraProp() -> [CMIOObjectID] {
 	var opa = CMIOObjectPropertyAddress(
 		mSelector: CMIOObjectPropertySelector(kCMIOHardwarePropertyDevices),
 		mScope: CMIOObjectPropertyScope(kCMIOObjectPropertyScopeGlobal),
@@ -24,22 +24,23 @@ private func getCameraProp() -> CMIOObjectID? {
 		result = CMIOObjectGetPropertyData(CMIOObjectID(kCMIOObjectSystemObject), &opa, 0, nil, dataSize, &dataUsed, devices)
 	} while result == OSStatus(kCMIOHardwareBadPropertySizeError)
 
-	var cameraId: CMIOObjectID?
+	var cameraIds: [CMIOObjectID] = []
 
 	if let devices = devices {
 		for offset in stride(from: 0, to: dataSize, by: MemoryLayout<CMIOObjectID>.size) {
 			let current = devices.advanced(by: Int(offset)).assumingMemoryBound(to: CMIOObjectID.self)
-			cameraId = current.pointee
+            cameraIds.append(current.pointee)
 		}
 	}
 
 	free(devices)
 
-	return cameraId
+	return cameraIds
 }
 
 public func isCameraOn() -> Bool {
-	guard let camera = getCameraProp() else {
+	let cameras = getCameraProp()
+    if cameras.isEmpty {
 		return false
 	}
 
@@ -51,16 +52,21 @@ public func isCameraOn() -> Bool {
 
 	var isUsed = false
 
-	var dataSize: UInt32 = 0
-	var dataUsed: UInt32 = 0
-	var result = CMIOObjectGetPropertyDataSize(camera, &opa, 0, nil, &dataSize)
-	if result == OSStatus(kCMIOHardwareNoError) {
-		if let data = malloc(Int(dataSize)) {
-			result = CMIOObjectGetPropertyData(camera, &opa, 0, nil, dataSize, &dataUsed, data)
-			let on = data.assumingMemoryBound(to: UInt8.self)
-			isUsed = on.pointee != 0
-		}
-	}
+    for camera in cameras {
+        var dataSize: UInt32 = 0
+        var dataUsed: UInt32 = 0
+        var result = CMIOObjectGetPropertyDataSize(camera, &opa, 0, nil, &dataSize)
+        if result == OSStatus(kCMIOHardwareNoError) {
+            if let data = malloc(Int(dataSize)) {
+                result = CMIOObjectGetPropertyData(camera, &opa, 0, nil, dataSize, &dataUsed, data)
+                let on = data.assumingMemoryBound(to: UInt8.self)
+                isUsed = on.pointee != 0
+            }
+        }
+        if isUsed {
+            return true
+        }
+    }
 
 	return isUsed
 }
